@@ -6,12 +6,14 @@ import numpy as np
 ElEstado = namedtuple('ElEstado', 'jugador, get_utilidad, tablero, movidas')
 
 class AgenteJugador(Agente):
-    def __init__(self, altura=3, jugador_ia=2):
+    def __init__(self, altura=3, jugador_ia=2, use_optimized_weights=False, custom_weights=None):
         """
         Args:
             altura: Profundidad del árbol de búsqueda para Alpha-Beta
             jugador_ia: El ID del jugador que representa la IA (1=Negro, 2=Blanco)
                         Por convención, 2=Blanco (recomendado)
+            use_optimized_weights: Si es True, intenta cargar pesos desde un archivo JSON
+            custom_weights: Pasa pesos específicos en formato diccionario (prioridad absoluta)
         """
         Agente.__init__(self)
         self.estado = None
@@ -19,9 +21,25 @@ class AgenteJugador(Agente):
         self.tecnica = "podaalfabeta"  # Por defecto
         self.jugador_ia = jugador_ia   # IMPORTANTE: Asignado una sola vez en __init__
         
+        weights_to_use = custom_weights
+        
+        if weights_to_use is None and use_optimized_weights:
+            import os, json
+            path = os.path.join(os.path.dirname(__file__), '..', 'ga', 'best_weights.json')
+            try:
+                if os.path.exists(path):
+                    with open(path, 'r') as f:
+                        weights_to_use = json.load(f)
+                    print("[INFO] Pesos óptimos cargados correctamente en el Agente.")
+                else:
+                    print(f"[WARN] Flag use_optimized_weights=True pero no se encontró {path}. Usando pesos manuales.")
+            except Exception as e:
+                print(f"[ERROR] Error al cargar pesos JSON guardados: {e}. Usando pesos manuales.")
+                weights_to_use = None
+        
         # Importar y configurar la heurística aquí para evitar imports circulares
         from heuristica_evaluacion_othello import FuncionEvaluacionOthello
-        self._evaluador = FuncionEvaluacionOthello(player_ia=jugador_ia)
+        self._evaluador = FuncionEvaluacionOthello(player_ia=jugador_ia, custom_weights=weights_to_use)
 
     def jugadas(self, estado):
         return estado.movidas

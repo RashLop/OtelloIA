@@ -39,9 +39,12 @@ class FuncionEvaluacionOthello:
         'final': {'fichas': 2.0, 'movilidad': 0.5, 'posicional': 0.3},      # Movidas 50-60
     }
     
-    def __init__(self, player_ia: int = 2):
+    def __init__(self, player_ia: int = 2, custom_weights=None):
         self.jugador_ia = player_ia
         self.opponent_id = 3 - player_ia  # 1 si IA es 2, 2 si IA es 1
+        
+        # Modo fallback seguro: si no hay custom_weights, usa los manuales
+        self.weights = custom_weights if custom_weights else self.WEIGHTS.copy()
     
     def evaluar(self, estado) -> float:
         tablero = estado.tablero
@@ -58,24 +61,24 @@ class FuncionEvaluacionOthello:
         
         score_fichas = self._evaluar_fichas(tablero)
         factor = self.PHASE_FACTORS[fase]['fichas']
-        evaluacion += score_fichas * factor * self.WEIGHTS['fichas']
+        evaluacion += score_fichas * factor * self.weights['fichas']
         
         score_movilidad = self._evaluar_movilidad(estado)
         factor = self.PHASE_FACTORS[fase]['movilidad']
-        evaluacion += score_movilidad * factor * self.WEIGHTS['movilidad']
+        evaluacion += score_movilidad * factor * self.weights['movilidad']
         
         score_esquinas = self._evaluar_esquinas(tablero)
-        evaluacion += score_esquinas * self.WEIGHTS['esquinas']
+        evaluacion += score_esquinas * self.weights['esquinas']
         
         score_adyacentes = self._evaluar_adyacentes(tablero)
-        evaluacion += score_adyacentes * self.WEIGHTS['adyacentes']
+        evaluacion += score_adyacentes * self.weights['adyacentes']
         
         score_estabilidad = self._evaluar_estabilidad(tablero)
-        evaluacion += score_estabilidad * self.WEIGHTS['estabilidad']
+        evaluacion += score_estabilidad * self.weights['estabilidad']
         
         score_posicional = self._evaluar_posicional(tablero)
         factor = self.PHASE_FACTORS[fase]['posicional']
-        evaluacion += score_posicional * factor * self.WEIGHTS['posicional']
+        evaluacion += score_posicional * factor * self.weights['posicional']
         
         return evaluacion
     

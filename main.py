@@ -12,7 +12,7 @@ def run_server(host, port):
 def run_ia(host, port, depth):
     print(f"Iniciando Cliente IA automáticamente (Profundidad {depth})...")
     time.sleep(1) # Pequeña espera para asegurar que el server levantó
-    client = ClienteIA(host, port, depth)
+    client = ClienteIA(host, port, depth, use_optimized_weights=True)
     client.run()
 
 if __name__ == "__main__":

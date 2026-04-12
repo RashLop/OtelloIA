@@ -7,9 +7,10 @@ from collections import namedtuple
 ElEstado = namedtuple('ElEstado', 'jugador, get_utilidad, tablero, movidas')
 
 class ClienteIA(ClienteBase):
-    def __init__(self, host='127.0.0.1', port=5555, depth=3):
+    def __init__(self, host='127.0.0.1', port=5555, depth=3, use_optimized_weights=False):
         super().__init__(host, port)
         self.depth = depth
+        self.use_optimized_weights = use_optimized_weights
         self.agente = None
         self.on_message_received = self.custom_handle_message
 
@@ -63,8 +64,8 @@ class ClienteIA(ClienteBase):
         print(f"[DEBUG CLIENTE IA] Estado creado -> Jugador: {estado_ia.jugador}, Movidas: {len(estado_ia.movidas)}")
 
         if not self.agente:
-            print("[DEBUG CLIENTE IA] Instanciando AgenteJugador por primera vez.")
-            self.agente = AgenteJugador(altura=self.depth, jugador_ia=self.player_color)
+            print(f"[DEBUG CLIENTE IA] Instanciando AgenteJugador por primera vez (Optimizados: {self.use_optimized_weights}).")
+            self.agente = AgenteJugador(altura=self.depth, jugador_ia=self.player_color, use_optimized_weights=self.use_optimized_weights)
             
         self.agente.estado = estado_ia
         
