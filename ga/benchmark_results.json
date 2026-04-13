@@ -1,0 +1,134 @@
+[
+    {
+        "experiment": "Manual vs Random (D2)",
+        "agent_a": "manual",
+        "agent_b": "random",
+        "wins_a": 6,
+        "wins_b": 1,
+        "draws": 1,
+        "winrate_a": 75.0,
+        "avg_time": 0.20663851499557495,
+        "margin_a": 26.333333333333332
+    },
+    {
+        "experiment": "Gen\u00e9tica vs Random (D2)",
+        "agent_a": "genetica",
+        "agent_b": "random",
+        "wins_a": 6,
+        "wins_b": 1,
+        "draws": 1,
+        "winrate_a": 75.0,
+        "avg_time": 0.2114286720752716,
+        "margin_a": 22.0
+    },
+    {
+        "experiment": "Gen\u00e9tica vs Manual (D2)",
+        "agent_a": "genetica",
+        "agent_b": "manual",
+        "wins_a": 8,
+        "wins_b": 0,
+        "draws": 0,
+        "winrate_a": 100.0,
+        "avg_time": 0.39323943853378296,
+        "margin_a": 20.0
+    },
+    {
+        "experiment": "Manual vs Random (D3)",
+        "agent_a": "manual",
+        "agent_b": "random",
+        "wins_a": 7,
+        "wins_b": 1,
+        "draws": 0,
+        "winrate_a": 87.5,
+        "avg_time": 0.9816087782382965,
+        "margin_a": 16.0
+    },
+    {
+        "experiment": "Gen\u00e9tica vs Random (D3)",
+        "agent_a": "genetica",
+        "agent_b": "random",
+        "wins_a": 8,
+        "wins_b": 0,
+        "draws": 0,
+        "winrate_a": 100.0,
+        "avg_time": 1.3033840358257294,
+        "margin_a": 26.75
+    },
+    {
+        "experiment": "Gen\u00e9tica vs Manual (D3)",
+        "agent_a": "genetica",
+        "agent_b": "manual",
+        "wins_a": 8,
+        "wins_b": 0,
+        "draws": 0,
+        "winrate_a": 100.0,
+        "avg_time": 1.6545556783676147,
+        "margin_a": 27.0
+    },
+    {
+        "experiment": "Manual vs Random (D4)",
+        "agent_a": "manual",
+        "agent_b": "random",
+        "wins_a": 6,
+        "wins_b": 0,
+        "draws": 0,
+        "winrate_a": 100.0,
+        "avg_time": 4.496948798497518,
+        "margin_a": 23.0
+    },
+    {
+        "experiment": "Gen\u00e9tica vs Random (D4)",
+        "agent_a": "genetica",
+        "agent_b": "random",
+        "wins_a": 6,
+        "wins_b": 0,
+        "draws": 0,
+        "winrate_a": 100.0,
+        "avg_time": 4.155905365943909,
+        "margin_a": 29.666666666666668
+    },
+    {
+        "experiment": "Gen\u00e9tica vs Manual (D4)",
+        "agent_a": "genetica",
+        "agent_b": "manual",
+        "wins_a": 6,
+        "wins_b": 0,
+        "draws": 0,
+        "winrate_a": 100.0,
+        "avg_time": 9.322101871172586,
+        "margin_a": 7.0
+    },
+    {
+        "experiment": "Manual vs Random (D5)",
+        "agent_a": "manual",
+        "agent_b": "random",
+        "wins_a": 4,
+        "wins_b": 0,
+        "draws": 0,
+        "winrate_a": 100.0,
+        "avg_time": 25.59382426738739,
+        "margin_a": 32.75
+    },
+    {
+        "experiment": "Gen\u00e9tica vs Random (D5)",
+        "agent_a": "genetica",
+        "agent_b": "random",
+        "wins_a": 4,
+        "wins_b": 0,
+        "draws": 0,
+        "winrate_a": 100.0,
+        "avg_time": 31.619047462940216,
+        "margin_a": 22.5
+    },
+    {
+        "experiment": "Gen\u00e9tica vs Manual (D5)",
+        "agent_a": "genetica",
+        "agent_b": "manual",
+        "wins_a": 2,
+        "wins_b": 2,
+        "draws": 0,
+        "winrate_a": 50.0,
+        "avg_time": 22.670343577861786,
+        "margin_a": 0.0
+    }
+]

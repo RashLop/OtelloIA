@@ -91,27 +91,34 @@ class OthelloGA:
             'posicional': 15.0
         }
         
+    def _clip_individual(self, ind):
+        ind['fichas'] = np.clip(ind['fichas'], 0, 30)
+        ind['movilidad'] = np.clip(ind['movilidad'], 10, 120)
+        ind['esquinas'] = np.clip(ind['esquinas'], 80, 300)
+        ind['adyacentes'] = np.clip(ind['adyacentes'], -120, -10)
+        ind['estabilidad'] = np.clip(ind['estabilidad'], 5, 80)
+        ind['posicional'] = np.clip(ind['posicional'], 5, 50)
+        return ind
+
     def _create_individual(self):
         ind = {}
         for k, v in self.baseline_weights.items():
             ind[k] = v + np.random.normal(0, abs(v) * 0.5) 
-            if k == 'adyacentes' and ind[k] > 0: ind[k] = -ind[k]
-        return ind
+        return self._clip_individual(ind)
         
     def _crossover(self, p1, p2):
         child = {}
         for k in self.keys:
             alpha = np.random.random()
             child[k] = alpha * p1[k] + (1 - alpha) * p2[k]  
-        return child
+        return self._clip_individual(child)
         
     def _mutate(self, ind):
         mutated = ind.copy()
         for k in self.keys:
             if np.random.random() < self.mutation_rate:
                 mutated[k] += np.random.normal(0, abs(self.baseline_weights[k]) * self.mutation_sigma)
-                if k == 'adyacentes' and mutated[k] > 0: mutated[k] = -mutated[k]
-        return mutated
+        return self._clip_individual(mutated)
         
     def evaluate_fitness(self, individual_weights):
         fitness = 0.0
@@ -140,76 +147,77 @@ class OthelloGA:
         total_corner_diff = 0
         total_danger = 0
         
-        for i in range(self.games_per_individual):
-            is_black = (i % 2 == 0)
-            # Jugar contra Default la mitad de veces, contra Random la otra mitad
-            against_random = (i >= self.games_per_individual / 2)
-            
-            evaluador_ind = FuncionEvaluacionOthello(player_ia=1 if is_black else 2, custom_weights=individual_weights)
-            agente_ind = AgenteJugador(altura=self.depth, jugador_ia=1 if is_black else 2)
-            agente_ind._evaluador = evaluador_ind
-            
-            if against_random:
-                agente_rival = RandomAgent(jugador_ia=2 if is_black else 1)
-            else:
-                evaluador_rival = FuncionEvaluacionOthello(player_ia=2 if is_black else 1)
-                agente_rival = AgenteJugador(altura=self.depth, jugador_ia=2 if is_black else 1)
-                agente_rival._evaluador = evaluador_rival
-            
-            if is_black:
-                winner, pts_black, pts_white, final_board = run_local_match(agente_ind, agente_rival)
-                margin = pts_black - pts_white
-                gane = (winner == 1)
-                my_p = 1
-            else:
-                winner, pts_black, pts_white, final_board = run_local_match(agente_rival, agente_ind)
-                margin = pts_white - pts_black
-                gane = (winner == 2)
-                my_p = 2
-                
-            # Extraer métricas de esquinas del tablero final
-            my_corners = 0
-            opp_corners = 0
-            my_danger = 0
-            corners = [(0,0), (0,7), (7,0), (7,7)]
-            adjacents = {
-                (0,0): [(0,1), (1,0), (1,1)],
-                (0,7): [(0,6), (1,7), (1,6)],
-                (7,0): [(6,0), (7,1), (6,1)],
-                (7,7): [(7,6), (6,7), (6,6)]
-            }
-            opp_p = 3 - my_p
-            for r, c in corners:
-                if final_board[r][c] == my_p:
-                    my_corners += 1
-                elif final_board[r][c] == opp_p:
-                    opp_corners += 1
-                elif final_board[r][c] == 0:
-                    for ar, ac in adjacents[(r,c)]:
-                        if final_board[ar][ac] == my_p:
-                            my_danger += 1
-            
-            total_corner_diff += (my_corners - opp_corners)
-            total_danger += my_danger
-                
-            if gane:
-                wins += 1
-                total_margin += margin 
-            elif winner == 0:
-                wins += 0.5  # Empate
-            else:
-                total_margin += margin # Es negativo
-                
-        # 2. CÁLCULO DE FITNESS
-        # A (Dominante): Tasa de victoria
-        # B (Secundario): Margen final promedio de fichas
-        # C (Muy importante): Diferencia de esquinas tomadas al final de la partida
-        # D (Importante): Posiciones peligrosas retenidas (adyacentes a esquinas vacías)
+        # Test exacto en múltiples niveles de maestría
+        depths_to_test = [2, 3]
+        total_games_played = self.games_per_individual * len(depths_to_test)
         
-        win_rate = wins / self.games_per_individual
-        avg_margin = total_margin / self.games_per_individual
-        avg_corner_diff = total_corner_diff / self.games_per_individual
-        avg_danger = total_danger / self.games_per_individual
+        for eval_depth in depths_to_test:
+            for i in range(self.games_per_individual):
+                is_black = (i % 2 == 0)
+                # Jugar contra Default la mitad de veces, contra Random la otra mitad
+                against_random = (i >= self.games_per_individual / 2)
+                
+                evaluador_ind = FuncionEvaluacionOthello(player_ia=1 if is_black else 2, custom_weights=individual_weights)
+                agente_ind = AgenteJugador(altura=eval_depth, jugador_ia=1 if is_black else 2)
+                agente_ind._evaluador = evaluador_ind
+                
+                if against_random:
+                    agente_rival = RandomAgent(jugador_ia=2 if is_black else 1)
+                else:
+                    evaluador_rival = FuncionEvaluacionOthello(player_ia=2 if is_black else 1)
+                    agente_rival = AgenteJugador(altura=eval_depth, jugador_ia=2 if is_black else 1)
+                    agente_rival._evaluador = evaluador_rival
+                
+                if is_black:
+                    winner, pts_black, pts_white, final_board = run_local_match(agente_ind, agente_rival)
+                    margin = pts_black - pts_white
+                    gane = (winner == 1)
+                    my_p = 1
+                else:
+                    winner, pts_black, pts_white, final_board = run_local_match(agente_rival, agente_ind)
+                    margin = pts_white - pts_black
+                    gane = (winner == 2)
+                    my_p = 2
+                    
+                # Extraer métricas de esquinas del tablero final
+                my_corners = 0
+                opp_corners = 0
+                my_danger = 0
+                corners = [(0,0), (0,7), (7,0), (7,7)]
+                adjacents = {
+                    (0,0): [(0,1), (1,0), (1,1)],
+                    (0,7): [(0,6), (1,7), (1,6)],
+                    (7,0): [(6,0), (7,1), (6,1)],
+                    (7,7): [(7,6), (6,7), (6,6)]
+                }
+                opp_p = 3 - my_p
+                for r, c in corners:
+                    if final_board[r][c] == my_p:
+                        my_corners += 1
+                    elif final_board[r][c] == opp_p:
+                        opp_corners += 1
+                    elif final_board[r][c] == 0:
+                        for ar, ac in adjacents[(r,c)]:
+                            if final_board[ar][ac] == my_p:
+                                my_danger += 1
+                
+                total_corner_diff += (my_corners - opp_corners)
+                total_danger += my_danger
+                    
+                if gane:
+                    wins += 1
+                    total_margin += margin 
+                elif winner == 0:
+                    wins += 0.5  # Empate
+                else:
+                    total_margin += margin # Es negativo
+                    
+        # 2. CÁLCULO DE FITNESS
+        
+        win_rate = wins / total_games_played
+        avg_margin = total_margin / total_games_played
+        avg_corner_diff = total_corner_diff / total_games_played
+        avg_danger = total_danger / total_games_played
         
         A = 1000.0
         B = 2.0
