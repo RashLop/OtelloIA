@@ -3,6 +3,36 @@ from cliente_base import ClienteBase
 from interfaz_grafica import InterfazJuego
 import time
 
+
+def prompt_int(message, default_value, min_value=None, max_value=None):
+    while True:
+        raw_value = input(f"{message} [{default_value}]: ").strip()
+        if not raw_value:
+            return default_value
+
+        try:
+            value = int(raw_value)
+        except ValueError:
+            print("Ingresa un numero valido.")
+            continue
+
+        if min_value is not None and value < min_value:
+            print(f"Ingresa un valor mayor o igual a {min_value}.")
+            continue
+
+        if max_value is not None and value > max_value:
+            print(f"Ingresa un valor menor o igual a {max_value}.")
+            continue
+
+        return value
+
+
+
+def prompt_host(message, default_value):
+    raw_value = input(f"{message} [{default_value}]: ").strip()
+    return raw_value or default_value
+
+
 class ClienteHumano(ClienteBase):
     def __init__(self, host, port):
         super().__init__(host, port)
@@ -46,9 +76,10 @@ class ClienteHumano(ClienteBase):
         self.ui.quit()
 
 if __name__ == "__main__":
-    host = input("Servidor [localhost]: ").strip() or 'localhost'
-    port_input = input("Puerto [5555]: ").strip()
-    port = int(port_input) if port_input.isdigit() else 5555
-    
+    host = prompt_host("Ingresa la IP o nombre de host", "127.0.0.1")
+    port = prompt_int("Ingresa el puerto", 5555, min_value=1, max_value=65535)
+
+    print(f"Conectando cliente humano a {host}:{port}...")
+
     cliente = ClienteHumano(host, port)
     cliente.run()

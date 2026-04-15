@@ -3,16 +3,24 @@ import numpy as np
 from cliente_base import ClienteBase
 from AgenteIA.AgenteJugador import AgenteJugador
 from collections import namedtuple
+from interfaz_grafica import InterfazJuego
 
 ElEstado = namedtuple('ElEstado', 'jugador, get_utilidad, tablero, movidas')
 
 class ClienteIA(ClienteBase):
-    def __init__(self, host='127.0.0.1', port=5555, depth=3, use_optimized_weights=False):
+    def __init__(self, host='127.0.0.1', port=5555, depth=3, use_optimized_weights=False, show_ui=False):
         super().__init__(host, port)
         self.depth = depth
         self.use_optimized_weights = use_optimized_weights
+        self.show_ui = show_ui
+        self.ui = None
+        self.running = True
         self.agente = None
         self.on_message_received = self.custom_handle_message
+
+    def on_quit(self):
+        self.running = False
+        self.disconnect("Usuario cerró la ventana")
 
     def custom_handle_message(self, message):
         msg_type = message.get('type')
@@ -86,10 +94,31 @@ class ClienteIA(ClienteBase):
     def run(self):
         if not self.connect():
             return
+
+        if self.show_ui:
+            self.ui = InterfazJuego()
+
         try:
-            while self.connected:
-                time.sleep(0.1)
+            while self.connected and self.running:
+                if self.ui:
+                    if not self.ui.run_event_loop(on_quit=self.on_quit):
+                        break
+
+                    if not self.connected or self.waiting_for_opponent:
+                        color_info = f"{'Negro' if self.player_color == 1 else 'Blanco'}" if self.player_color else ""
+                        self.ui.draw_waiting_screen(self.connection_status, color_info)
+                    else:
+                        self.ui.draw_game_state(self.game_state, self.player_color)
+
+                    self.ui.clock.tick(30)
+                else:
+                    time.sleep(0.1)
         except KeyboardInterrupt:
             print("\n⏹️  Deteniendo Cliente IA...")
         finally:
             self.disconnect()
+            if self.ui:
+                try:
+                    self.ui.quit()
+                except SystemExit:
+                    pass
